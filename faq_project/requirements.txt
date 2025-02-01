@@ -1,0 +1,7 @@
+Django>=4.2
+djangorestframework>=3.14
+django-ckeditor>=6.7.0
+googletrans==4.0.0-rc1
+gunicorn>=21.2.0
+whitenoise>=6.6.0
+# sqlite3

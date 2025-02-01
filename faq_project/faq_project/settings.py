@@ -40,7 +40,7 @@ INSTALLED_APPS = [
 
     #add ons
     'ckeditor',
-    'rest_framework'
+    'rest_framework',
 
     #custom apps
     'faq'

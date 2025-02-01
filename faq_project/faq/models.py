@@ -18,7 +18,7 @@ class FAQ(models.Model):
         
         translated_text = translator.translate(self.question, dest=lang).text
 
-        cache.set(cache_key, translated_text, timeout= 3000)
+        cache.set(cache_key, translated_text, timeout= 3600)
         return translated_text
     
     def __str__(self):
