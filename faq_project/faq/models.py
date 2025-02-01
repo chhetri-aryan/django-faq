@@ -6,20 +6,29 @@ from googletrans import Translator
 translator = Translator()
 
 class FAQ(models.Model):
-    question = models.TextField
+    question = models.TextField(null=True)
     answer = RichTextField()
-    
-    def get_translation(self, lang='en'):
-        cache_key = f'faq_{self.id}_{lang}'
+
+    def get_translation(self, lang='en', field='question'):
+        cache_key = f'faq_{self.id}_{field}_{lang}'
         cached_translation = cache.get(cache_key)
 
         if cached_translation:
             return cached_translation
         
-        translated_text = translator.translate(self.question, dest=lang).text
+        if field == 'answer':
+            text_to_translate = self.answer
+        else:
+            text_to_translate = self.question
 
-        cache.set(cache_key, translated_text, timeout= 3600)
+        try:
+            translated_text = translator.translate(text_to_translate, dest=lang).text
+        except Exception as e:
+            print(f"Translation failed: {e}")
+            return text_to_translate
+
+        cache.set(cache_key, translated_text, timeout=3600)
         return translated_text
-    
+
     def __str__(self):
         return self.question
