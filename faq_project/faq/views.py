@@ -8,12 +8,15 @@ from .serializers import FAQSerializer
 def get_faqs(request):
     lang = request.query_params.get('lang', 'en')
     
-    # Try to get all FAQs from cache first
+    # Try to get all FAQs from cache first (gracefully handle cache failures)
     cache_key = f'faqs_all_{lang}'
-    cached_data = cache.get(cache_key)
-    
-    if cached_data:
-        return Response(cached_data)
+    try:
+        cached_data = cache.get(cache_key)
+        if cached_data:
+            return Response(cached_data)
+    except Exception:
+        # If cache is unavailable, continue without it
+        pass
     
     # Use only() to fetch only required fields for better performance
     faqs = FAQ.objects.only('id', 'question', 'answer').all()
@@ -27,7 +30,11 @@ def get_faqs(request):
         }
         data.append(faq_data)
 
-    # Cache the complete response for this language
-    cache.set(cache_key, data, timeout=1800)  # 30 minutes cache
+    # Cache the complete response for this language (gracefully handle cache failures)
+    try:
+        cache.set(cache_key, data, timeout=1800)  # 30 minutes cache
+    except Exception:
+        # If cache is unavailable, continue without it
+        pass
     
     return Response(data)

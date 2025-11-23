@@ -14,10 +14,15 @@ class FAQ(models.Model):
             return self.answer if field == 'answer' else self.question
         
         cache_key = f'faq_{self.id}_{field}_{lang}'
-        cached_translation = cache.get(cache_key)
-
-        if cached_translation:
-            return cached_translation
+        
+        # Try to get from cache (gracefully handle cache failures)
+        try:
+            cached_translation = cache.get(cache_key)
+            if cached_translation:
+                return cached_translation
+        except Exception:
+            # If cache is unavailable, continue without it
+            pass
         
         text_to_translate = self.answer if field == 'answer' else self.question
 
@@ -29,7 +34,13 @@ class FAQ(models.Model):
             print(f"Translation failed: {e}")
             return text_to_translate
 
-        cache.set(cache_key, translated_text, timeout=3600)
+        # Try to cache the result (gracefully handle cache failures)
+        try:
+            cache.set(cache_key, translated_text, timeout=3600)
+        except Exception:
+            # If cache is unavailable, continue without it
+            pass
+        
         return translated_text
 
     def __str__(self):
