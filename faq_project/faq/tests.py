@@ -23,7 +23,7 @@ def test_faq_api():
         answer="Django is a high-level Python web framework."
     )
     client = APIClient()
-    url = 'http://127.0.0.1:8000/api/faqs/'
+    url = reverse('faq-list')
     response = client.get(url, {'lang': 'hi'})
     assert response.status_code == status.HTTP_200_OK
     assert 'question' in response.data[0]
@@ -72,7 +72,8 @@ def test_api_response_includes_id():
         answer="Test Answer"
     )
     client = APIClient()
-    response = client.get('/api/faqs/', {'lang': 'en'})
+    url = reverse('faq-list')
+    response = client.get(url, {'lang': 'en'})
     
     assert response.status_code == status.HTTP_200_OK
     assert len(response.data) > 0
