@@ -2,6 +2,9 @@ from django.db import models
 from ckeditor.fields import RichTextField
 from django.core.cache import cache
 from googletrans import Translator
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class FAQ(models.Model):
@@ -31,7 +34,7 @@ class FAQ(models.Model):
             translator = Translator()
             translated_text = translator.translate(text_to_translate, dest=lang).text
         except Exception as e:
-            print(f"Translation failed: {e}")
+            logger.error(f"Translation failed for FAQ {self.id}: {e}")
             return text_to_translate
 
         # Try to cache the result (gracefully handle cache failures)
@@ -44,4 +47,4 @@ class FAQ(models.Model):
         return translated_text
 
     def __str__(self):
-        return self.question
+        return self.question or f"FAQ {self.id}"

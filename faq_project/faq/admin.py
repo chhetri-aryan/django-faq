@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.utils.html import format_html
+from django.utils.html import format_html, strip_tags
 from .models import FAQ
 
 @admin.register(FAQ)
@@ -15,7 +15,6 @@ class FAQAdmin(admin.ModelAdmin):
     def answer_preview(self, obj):
         """Show a preview of the answer instead of full translated content"""
         # Strip HTML tags for preview and limit length
-        from django.utils.html import strip_tags
         preview = strip_tags(obj.answer)[:100]
         return format_html('<span title="{}">{}</span>', obj.answer, preview + '...' if len(preview) >= 100 else preview)
     answer_preview.short_description = 'Answer Preview'

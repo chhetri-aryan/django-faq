@@ -46,12 +46,23 @@ def test_english_translation_optimization():
 def test_database_index_exists():
     """Test that database index exists on question field"""
     from django.db import connection
-    with connection.cursor() as cursor:
-        cursor.execute(
-            "SELECT sql FROM sqlite_master WHERE type='index' AND tbl_name='faq_faq' AND sql LIKE '%question%';"
-        )
-        indexes = cursor.fetchall()
-        assert len(indexes) > 0, "Database index on 'question' field should exist"
+    from django.db.models import Index
+    
+    # Get model metadata
+    faq_model = FAQ._meta
+    
+    # Check if question field has db_index=True
+    question_field = faq_model.get_field('question')
+    assert question_field.db_index is True, "question field should have db_index=True"
+    
+    # Additional verification using connection introspection if SQLite
+    if connection.vendor == 'sqlite':
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT sql FROM sqlite_master WHERE type='index' AND tbl_name='faq_faq' AND sql LIKE '%question%';"
+            )
+            indexes = cursor.fetchall()
+            assert len(indexes) > 0, "Database index on 'question' field should exist"
 
 @pytest.mark.django_db 
 def test_api_response_includes_id():
